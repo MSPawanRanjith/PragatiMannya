@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
         verfierLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent verfierLoginIntent = new Intent(getBaseContext(),MainActivity.class);
+                Intent verfierLoginIntent = new Intent(getBaseContext(),VerifierLoginActivity.class);
                 startActivity(verfierLoginIntent);
             }
         });
