@@ -69,10 +69,10 @@ public class VerifierLoginActivity extends AppCompatActivity {
        // ref1.setAndroidContext(this);//auth = FirebaseAuth.getInstance();
        // Log.d("which authentication",finestayApp.getName().toString());
 
-        if (auth.getCurrentUser() != null) {
-            startActivity(new Intent(VerifierLoginActivity.this, VerifierWorkSpace.class));
-            finish();
-        }
+//        if (auth.getCurrentUser() != null) {
+//            startActivity(new Intent(VerifierLoginActivity.this, VerifierWorkSpace.class));
+//            finish();
+//        }
         setContentView(R.layout.activity_admin_login);
 
         inputEmail = (EditText) findViewById(R.id.email);
@@ -89,7 +89,7 @@ public class VerifierLoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(VerifierLoginActivity.this, ResetPasswordVerifierActivity.class);
-               // intent.putExtra("firebase_initialise",true);
+                intent.putExtra("firebase_initialise",i);
                 startActivity(intent);
                 finish();
 

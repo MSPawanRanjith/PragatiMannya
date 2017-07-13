@@ -1,5 +1,6 @@
 package com.example.administrator.pragatimannya;
 
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,27 +14,41 @@ import android.widget.Toast;
 import com.firebase.client.Firebase;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
 import com.google.firebase.auth.FirebaseAuth;
+
+import static com.example.administrator.pragatimannya.VerifierLoginActivity.i;
 
 public class ResetPasswordVerifierActivity extends AppCompatActivity {
     private EditText inputEmail;
     private Button btnReset, btnBack;
     private FirebaseAuth auth;
     private ProgressBar progressBar;
-    final Firebase ref1 = new Firebase("https://post-it-81fe6.firebaseio.com/");
+    private FirebaseApp app;
+    //final Firebase ref1 = new Firebase("https://post-it-81fe6.firebaseio.com/");
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reset_password);
 
+        FirebaseOptions options = new FirebaseOptions.Builder()
+                .setApplicationId("1:128918692988:android:e238b802c3c5c2fa") // Required for Analytics.
+                .setApiKey("AIzaSyC9XTPwkaZO7cx2bswrgvYYfEPAMXjfTXE") // Required for Auth.
+                .setDatabaseUrl("https://post-it-81fe6.firebaseio.com/")// Required for RTDB.
+                .build();
+
+        Intent extrasintent=getIntent();
         inputEmail = (EditText) findViewById(R.id.email);
         btnReset = (Button) findViewById(R.id.btn_reset_password);
         //btnBack = (Button) findViewById(R.id.btn_back);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
 
 
-        ref1.setAndroidContext(this);
-        auth = FirebaseAuth.getInstance();
+        Firebase.setAndroidContext(this);
+        app=FirebaseApp.initializeApp(ResetPasswordVerifierActivity.this,options,"secondary"+i);
+        auth = FirebaseAuth.getInstance(app);
+        i++;
 
 
 
