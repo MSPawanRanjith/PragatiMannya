@@ -3,6 +3,7 @@
     package="com.example.administrator.pragatimannya">
 
     <uses-permission android:name="android.permsission.INTERNET" />
+    <uses-permission android:name="android.permission.CALL_PHONE" />
 
     <application
         android:allowBackup="true"
@@ -22,7 +23,8 @@
         <activity android:name=".ResetPasswordActivity" />
         <activity android:name=".VerifierLoginActivity" />
         <activity android:name=".VerifierWorkSpace" />
-        <activity android:name=".ResetPasswordVerifierActivity"></activity>
+        <activity android:name=".ResetPasswordVerifierActivity" />
+        <activity android:name=".AdminAddTaskActivity"></activity>
     </application>
 
 </manifest>
