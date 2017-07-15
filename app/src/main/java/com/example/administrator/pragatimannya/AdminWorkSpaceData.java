@@ -10,17 +10,19 @@ public class AdminWorkSpaceData {
         public Long contact;
         public String email;
         public String type;
+        public String empuid;
 
         public AdminWorkSpaceData(){
         //Empty Constructor
         }
 
-        public AdminWorkSpaceData(String empname,String empid,String type,Long contact,String email){
+        public AdminWorkSpaceData(String empname,String empid,String type,Long contact,String email,String empuid){
             this.empname=empname;
             this.empid=empid;
             this.type=type;
             this.contact=contact;
             this.email=email;
+            this.empuid=empuid;
         }
         public String getEmpname()
         {
@@ -33,6 +35,7 @@ public class AdminWorkSpaceData {
         public String getType(){return this.type;}
         public String getContact() {return this.contact.toString();}
         public String getEmail() {return this.email;}
+        public String getEmpuid(){return  this.empuid;}
 }
 /*ref2.addListenerForSingleValueEvent(new ValueEventListener() {
     @Override

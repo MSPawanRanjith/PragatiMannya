@@ -19,6 +19,7 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.List;
 
@@ -31,6 +32,10 @@ public class VerifierLoginActivity extends AppCompatActivity {
     private FirebaseApp finestayApp;
     public static int  i=1;
     public static int   hasBeenInitialized=0;
+
+    //
+    FirebaseAuth.AuthStateListener authListener;
+    String uid;
 //    final Firebase ref1 = new Firebase("https://post-it-81fe6.firebaseio.com/");
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -133,8 +138,27 @@ public class VerifierLoginActivity extends AppCompatActivity {
                                     }
                                 } else {
                                     Log.v("wierd","as");
+                                    final FirebaseUser user = FirebaseAuth.getInstance(finestayApp).getCurrentUser();
+                                    authListener = new FirebaseAuth.AuthStateListener() {
+                                        @Override
+                                        public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                                            //FirebaseUser user = firebaseAuth.getCurrentUser();
+                                            if (user == null) {
+                                                // user auth state is changed - user is null
+                                                // launch login activity
+                                                startActivity(new Intent(VerifierLoginActivity.this, VerifierLoginActivity.class));
+                                                finish();
+                                            }
+                                        }
+                                    };
+                                    //Get UID of the user
+                                    uid = user.getUid();
+
+                                    Log.d("onCreate: ","uid : of verifier " + uid);
+
                                     Intent intent = new Intent(VerifierLoginActivity.this, VerifierWorkSpace.class);
                                   //  intent.putExtra("firebase_initialise",true);
+                                    intent.putExtra("UID",uid);
                                     startActivity(intent);
                                     finish();
                                 }

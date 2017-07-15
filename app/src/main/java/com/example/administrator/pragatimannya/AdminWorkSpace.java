@@ -30,6 +30,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
+
 public class AdminWorkSpace extends AppCompatActivity {
     //private Button signoutButton;
     FirebaseAuth auth;
@@ -39,6 +41,9 @@ public class AdminWorkSpace extends AppCompatActivity {
     private DatabaseReference mDatabase;
     private Long contactnum;
     public String emailadd;
+    public String mEmpuid;
+    ArrayList<Long> contactnumber;
+    ArrayList<String> Aempuid;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,6 +53,9 @@ public class AdminWorkSpace extends AppCompatActivity {
         auth=FirebaseAuth.getInstance();
         mDatabase = FirebaseDatabase.getInstance().getReference();
         Firebase.setAndroidContext(this);
+
+        contactnumber=new ArrayList<>();
+        Aempuid=new ArrayList<>();
 
         final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -94,7 +102,7 @@ public class AdminWorkSpace extends AppCompatActivity {
 
         ) {
             @Override
-            protected void populateViewHolder(PostviewHolder viewHolder, AdminWorkSpaceData model, int position) {
+            protected void populateViewHolder(PostviewHolder viewHolder, AdminWorkSpaceData model, final int position) {
 
                 viewHolder.setEmpname(model.getEmpname().toUpperCase());
                 viewHolder.setEmpid(model.getEmpid());
@@ -102,6 +110,9 @@ public class AdminWorkSpace extends AppCompatActivity {
                 viewHolder.setEmail(model.getEmail());
                 contactnum=Long.parseLong(model.getContact());
                 emailadd=model.getEmail();
+                mEmpuid=model.getEmpuid();
+                Aempuid.add(mEmpuid);
+                contactnumber.add(contactnum);
                 viewHolder.mview.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -113,7 +124,7 @@ public class AdminWorkSpace extends AppCompatActivity {
 
                             public void onClick(DialogInterface dialog, int which) {
                                 // Do nothing but close the dialog
-                                Intent intent = new Intent(Intent.ACTION_DIAL, Uri.fromParts("tel",contactnum.toString(), null));
+                                Intent intent = new Intent(Intent.ACTION_DIAL, Uri.fromParts("tel",contactnumber.get(position).toString(), null));
                                 dialog.dismiss();
                                 try {
                                     startActivity(intent);
@@ -140,8 +151,9 @@ public class AdminWorkSpace extends AppCompatActivity {
                             public void onClick(DialogInterface dialog, int which) {
 
                                 // Do nothing
-                                Intent intent =new Intent(AdminWorkSpace.this,AdminAddTaskActivity.class);
 
+                                Intent intent =new Intent(AdminWorkSpace.this,AdminAddTaskActivity.class);
+                                intent.putExtra("EMP_UID",Aempuid.get(position));
                                 dialog.dismiss();
                                 startActivity(intent);
                             }

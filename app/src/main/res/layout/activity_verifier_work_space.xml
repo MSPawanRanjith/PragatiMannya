@@ -10,4 +10,11 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.example.administrator.pragatimannya.VerifierWorkSpace">
 
+    <android.support.v7.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/list_verify">
+
+    </android.support.v7.widget.RecyclerView>
+
 </RelativeLayout>
