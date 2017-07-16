@@ -1,7 +1,10 @@
 package com.example.administrator.pragatimannya;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -20,12 +23,18 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 
+import java.util.ArrayList;
+
 public class VerifierWorkSpace extends AppCompatActivity {
 
     FirebaseAuth auth;
     public String uid;
     DatabaseReference mDatabase;
     private RecyclerView recylceview;
+    private ArrayList<String> Astatus;
+    private ArrayList<Double> Alat;
+    private ArrayList<Double> Along;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,6 +45,10 @@ public class VerifierWorkSpace extends AppCompatActivity {
 
         Intent intent=getIntent();
         uid=intent.getStringExtra("UID");
+
+        Astatus=new ArrayList<>();
+        Alat=new ArrayList<>();
+        Along=new ArrayList<>();
 
         Log.d("UID of verifier in work",uid);
 
@@ -68,11 +81,69 @@ public class VerifierWorkSpace extends AppCompatActivity {
             @Override
             protected void populateViewHolder(VerifierWorkSpace.PostviewHolder viewHolder, AdminAddTaskData model, final int position) {
 
-                viewHolder.setTitle("Task "+position+1);
+                viewHolder.setTitle("Task "+(position+1));
                 viewHolder.setDesc(model.getDescription());
                 viewHolder.setLat(model.getGeolat());
                 viewHolder.setLong(model.getGeolong());
                 viewHolder.setAddress(model.getAddress());
+
+                //Setting Required stuffs
+                Astatus.add(model.getStatus());
+                Alat.add(Double.parseDouble(model.getGeolat()));
+                Along.add(Double.parseDouble(model.getGeolong()));
+
+
+
+                viewHolder.mview.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                        if (Astatus.get(position).equals("1")) {
+                            AlertDialog.Builder builder = new AlertDialog.Builder(VerifierWorkSpace.this);
+
+                            builder.setTitle("Proceed");
+                            builder.setMessage("Are you sure?");
+
+                            builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+
+                                public void onClick(DialogInterface dialog, int which) {
+                                    // Do nothing but close the dialog
+                                    Intent intent=new Intent(VerifierWorkSpace.this,ValidateGPSActivity.class);
+                                    intent.putExtra("GEO_LAT",Alat.get(position));
+                                    intent.putExtra("GEO_LONG",Along.get(position));
+
+                                    dialog.dismiss();
+                                    startActivity(intent);
+
+                                }
+                            });
+
+                            builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+
+                                    // Do nothing
+                                    dialog.dismiss();
+                                }
+                            });
+
+                            AlertDialog alert = builder.create();
+                            alert.show();
+                        }
+                        else{
+                            Snackbar.make(view,"This task has been already completed",Snackbar.LENGTH_LONG)
+                                    .setAction("CLOSE", new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View view) {
+
+                                        }
+                                    })
+                                    .setActionTextColor(getResources().getColor(android.R.color.holo_red_light))
+                                    .show();
+                        }
+                    }
+                });
 
 
 
