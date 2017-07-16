@@ -186,6 +186,14 @@ public class AdminWorkSpace extends AppCompatActivity {
            // case R.id.action_remove:
                // delete();
              //   return true;
+            case R.id.action_remove:
+            {
+                Intent intent = new Intent(AdminWorkSpace.this, AdminRemoveTaskActivity.class);
+                startActivity(intent);
+                return true;
+            }
+
+
             case R.id.action_signout:
                 signout();
                 return true;

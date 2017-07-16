@@ -3,14 +3,20 @@ package com.example.administrator.pragatimannya;
 import android.*;
 import android.Manifest;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 //import android.location.LocationListener;
+import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -31,8 +37,24 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+import com.kosalgeek.android.photoutil.CameraPhoto;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class ValidateGPSActivity extends FragmentActivity implements OnMapReadyCallback,GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener {
@@ -42,19 +64,45 @@ public class ValidateGPSActivity extends FragmentActivity implements OnMapReadyC
     Location mLastLocation;
     Marker mCurrLocationMarker;
     LocationRequest mLocationRequest;
-    ProgressDialog mProgress;
+    ProgressDialog mProgress,mUpload;
     Double mRecievedLat,mRecievedLong;
     Double mCurrLat,mCurrLong;
+    private final static int CAMERA_REQUEST_CODE=1;
+    DatabaseReference mDatabase;
+    private StorageReference mStorage;
+    public  Uri photoURI;
+
+    CaameraPhoto cameraPhoto;
+
+
+    //helper for photoURi
+
+    String mCurrentPhotoPath;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        if(ContextCompat.checkSelfPermission(this,Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED ){
+            ActivityCompat.requestPermissions(this,new String[] {Manifest.permission.CAMERA},0);
+        }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_validate_gps);
 
+
+        cameraPhoto=new CaameraPhoto(this);
+
+
         mProgress=new ProgressDialog(this);
         mProgress.setCanceledOnTouchOutside(false);
+        mUpload=new ProgressDialog(this);
+        mUpload.setCanceledOnTouchOutside(false);
 
         mProgress.setMessage("Validating Location...");
         mProgress.show();
+
+        mStorage= FirebaseStorage.getInstance().getReference();
+        mDatabase= FirebaseDatabase.getInstance().getReference();
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -163,6 +211,16 @@ public class ValidateGPSActivity extends FragmentActivity implements OnMapReadyC
                 //longitude matches
                 Toast.makeText(getApplicationContext(),"BothMatching",Toast.LENGTH_SHORT).show();
 
+                //camera intent
+               // Intent intent=new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                try {
+                    //dispatchTakePictureIntent();
+                    startActivityForResult(cameraPhoto.takePhotoIntent(), CAMERA_REQUEST_CODE);
+                }
+                catch (Exception e){
+
+                }
+
             }
             else{
                 Toast.makeText(getApplicationContext(),"Move towards side",Toast.LENGTH_SHORT).show();
@@ -185,6 +243,53 @@ public class ValidateGPSActivity extends FragmentActivity implements OnMapReadyC
         Toast.makeText(getBaseContext(), "connection changed", Toast.LENGTH_SHORT).show();
 
     }
+    //Camrea activity override
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode == CAMERA_REQUEST_CODE && resultCode==RESULT_OK){
+
+            mUpload.setMessage("Uploading...");
+            mUpload.show();
+          //  Uri uri=data.getData();
+
+            StorageReference filepath=mStorage.child("LocationPhotos").child(cameraPhoto.getPhotoPath());
+            filepath.putFile(cameraPhoto.getPhotoUri()).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+
+                   Uri downloadUri=taskSnapshot.getDownloadUrl();
+                  try{
+                      mDatabase.child(getIntent().getStringExtra("PARENT_KEY")).child("status")
+                              .setValue(downloadUri.toString());
+                  }
+                  catch (Exception e){
+                      e.printStackTrace();
+                  }
+
+
+
+                    Toast.makeText(getApplicationContext(),"Photo  uploaded ",Toast.LENGTH_SHORT).show();
+                    mProgress.dismiss();
+                    Toast.makeText(getApplicationContext(),"Photo  uploaded ",Toast.LENGTH_SHORT).show();
+
+                    Intent intent=new Intent(ValidateGPSActivity.this,VerifierLoginActivity.class);
+                    startActivity(intent);
+
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Toast.makeText(getApplicationContext(),"Photo unable to upload",Toast.LENGTH_SHORT).show();
+                }
+            });
+
+        }
+    }
+
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
 

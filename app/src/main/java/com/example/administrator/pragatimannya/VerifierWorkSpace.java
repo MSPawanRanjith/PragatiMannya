@@ -19,9 +19,13 @@ import com.firebase.client.Firebase;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
@@ -34,6 +38,7 @@ public class VerifierWorkSpace extends AppCompatActivity {
     private ArrayList<String> Astatus;
     private ArrayList<Double> Alat;
     private ArrayList<Double> Along;
+    private ArrayList<String> AparentNode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +54,7 @@ public class VerifierWorkSpace extends AppCompatActivity {
         Astatus=new ArrayList<>();
         Alat=new ArrayList<>();
         Along=new ArrayList<>();
+        AparentNode=new ArrayList<>();
 
         Log.d("UID of verifier in work",uid);
 
@@ -68,6 +74,21 @@ public class VerifierWorkSpace extends AppCompatActivity {
 
         Log.d("Where verify", "onStart: ");
         Query userfEvents = mDatabase.orderByChild("type").equalTo(uid);
+
+       userfEvents.addListenerForSingleValueEvent(new ValueEventListener() {
+           @Override
+           public void onDataChange(DataSnapshot dataSnapshot) {
+               for (DataSnapshot child: dataSnapshot.getChildren()) {
+                   Log.d("MainActivity parent key", child.getKey());
+                   AparentNode.add(child.getKey());
+               }
+           }
+
+           @Override
+           public void onCancelled(DatabaseError databaseError) {
+               Log.e("MainActivity", "onCancelled", databaseError.toException());
+           }
+       });
 
         Log.d("SAomething",userfEvents.toString());
         FirebaseRecyclerAdapter<AdminAddTaskData,VerifierWorkSpace.PostviewHolder> firebaseRecyclerAdapter = new FirebaseRecyclerAdapter<AdminAddTaskData, VerifierWorkSpace.PostviewHolder>(
@@ -94,6 +115,7 @@ public class VerifierWorkSpace extends AppCompatActivity {
 
 
 
+
                 viewHolder.mview.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -111,7 +133,7 @@ public class VerifierWorkSpace extends AppCompatActivity {
                                     Intent intent=new Intent(VerifierWorkSpace.this,ValidateGPSActivity.class);
                                     intent.putExtra("GEO_LAT",Alat.get(position));
                                     intent.putExtra("GEO_LONG",Along.get(position));
-
+                                    intent.putExtra("PARENT_KEY",AparentNode.get(position));
                                     dialog.dismiss();
                                     startActivity(intent);
 
@@ -161,9 +183,12 @@ public class VerifierWorkSpace extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem menuItem){
         switch (menuItem.getItemId()) {
-            // case R.id.action_remove:
-            // delete();
-            //   return true;
+//            case R.id.action_remove:
+//            {
+//                Intent intent = new Intent(VerifierWorkSpace.this, AdminRemoveTaskActivity.class);
+//                startActivity(intent);
+//            }
+             // return true;
             case R.id.action_signout:
                 signout();
                 return true;
